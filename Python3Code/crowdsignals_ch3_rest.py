@@ -131,6 +131,32 @@ def main():
         DataViz.plot_dataset(dataset, ['pca_', 'label'], [
                              'like', 'like'], ['line', 'points'])
 
+    elif FLAGS.mode == 'lr':
+        og_dataset = copy.deepcopy(dataset)
+        for col in [c for c in dataset.columns if not 'label' in c]:
+            dataset = MisVal.impute_interpolate(dataset, col)
+
+        col = "hr_watch_rate"
+        features = ["acc_phone_x","acc_phone_y", "acc_phone_z", 
+                    "gyr_phone_x", "gyr_phone_y", "gyr_phone_z", 
+                    "acc_watch_x", "acc_watch_y", "acc_watch_z", 
+                    "gyr_watch_x", "gyr_watch_y", "gyr_watch_z",
+                    "mag_phone_x", "mag_phone_y", "mag_phone_z",
+                    "mag_watch_x", "mag_watch_y", "mag_watch_z",
+                    "labelSitting", "labelWalking",	"labelStanding", "labelRunning"]
+        best_regression = MisVal.linear_regression(dataset, col, features)
+        #exit(1)
+        new_dataset = copy.deepcopy(og_dataset)
+        for index, val in og_dataset[col].items():
+            isNan = np.isnan(val)
+            if isNan:
+                evaluator = dataset.loc[[index]][features]
+                pred = best_regression.predict(evaluator)
+                new_dataset.at[index, col] = pred
+                #print("Found nan in " + col + " at "+ str(index) + ", predicted: " + str(pred))
+        DataViz.plot_dataset(new_dataset, [col], ['like'], ['line'])
+
+
     elif FLAGS.mode == 'final':
         # Now, for the final version. 
         # We first start with imputation by interpolation
@@ -183,7 +209,7 @@ if __name__ == '__main__':
                         'lowpass' applies the lowpass-filter to a single variable \
                         'imputation' is used for the next chapter \
                         'PCA' is to study the effect of PCA and plot the results\
-                        'final' is used for the next chapter", choices=['lowpass', 'imputation', 'PCA', 'final'])
+                        'final' is used for the next chapter", choices=['lowpass', 'imputation', 'PCA', 'final', 'lr'])
 
    
     FLAGS, unparsed = parser.parse_known_args()

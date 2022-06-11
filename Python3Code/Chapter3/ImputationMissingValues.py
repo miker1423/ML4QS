@@ -7,6 +7,9 @@
 #                                                            #
 ##############################################################
 
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
 # Simple class to impute missing values of a single columns.
 class ImputationMissingValues:
 
@@ -26,3 +29,13 @@ class ImputationMissingValues:
         # And fill the initial data points if needed:
         dataset[col] = dataset[col].fillna(method='bfill')
         return dataset
+
+    def linear_regression(self, dataset, col, features):
+        size = dataset.shape[0]
+        y_value = dataset[col].values.reshape(size, 1)
+        x_value = dataset[features]
+        reg = LinearRegression().fit(x_value, y_value)
+        score = reg.score(x_value, y_value)
+        print("Score: " + str(score) + " with: " + str(features) + "+"+col)
+        return reg
+        
