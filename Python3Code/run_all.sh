@@ -1,0 +1,7 @@
+python3 our_dataset.py
+python3 our_dataset_ch3.py
+python3 our_dataset_ch3_rest.py
+python3 our_dataset_ch4.py
+python3 our_dataset_ch5.py
+python3 our_dataset_ch7_classification.py
+python3 our_dataset_ch7_regression.py

@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 import dateutil
 import matplotlib as mpl
-mpl.use('tkagg')
+mpl.use('agg')
 
 class VisualizeDataset:
 
@@ -29,7 +29,7 @@ class VisualizeDataset:
     # Set some initial attributes to define and create a save location for the images.
     def __init__(self, module_path='.py'):
         subdir = Path(module_path).name.split('.')[0]
-
+        mpl.rcParams['figure.figsize'] = 16, 12
         self.plot_number = 1
         self.figures_dir = Path('figures') / subdir
         self.figures_dir.mkdir(exist_ok=True, parents=True)
