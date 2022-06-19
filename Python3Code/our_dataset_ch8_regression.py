@@ -25,9 +25,8 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split
 
 # Set up file names and locations.
-DATA_PATH = Path('./intermediate_datafiles/')
-DATASET_FNAME = 'chapter2_result.csv'
-RESULT_FNAME =  'chapter3_result_outliers.csv'
+DATA_PATH = Path('./intermediate_datafiles/ours/')
+DATASET_FNAME = 'ours_result.csv'
 
 # Next, import the data from the specified location and parse the date index.
 try:
@@ -37,14 +36,15 @@ except IOError as e:
     print('File not found, try to run previous crowdsignals scripts first!')
     raise e
 
+dataset = dataset.fillna(method = 'backfill', axis= 1)
 # We'll create an instance of our visualization class to plot the results.
 DataViz = VisualizeDataset(__file__)
 
 # Of course we repeat some stuff from Chapter 3, namely to load the dataset
 
 # Read the result from the previous chapter, and make sure the index is of the type datetime.
-DATA_PATH = Path('./intermediate_datafiles/')
-DATASET_FNAME = 'chapter5_result.csv'
+DATA_PATH = Path('./intermediate_datafiles/ours/')
+DATASET_FNAME = 'ours_chapter5_result.csv'
 
 DataViz = VisualizeDataset(__file__)
 
@@ -55,6 +55,7 @@ except IOError as e:
     raise e
 
 dataset.index = pd.to_datetime(dataset.index)
+dataset.fillna(method='backfill', axis='columns')
 
 # Let us consider our second task, namely the prediction of the heart rate. We consider this as a temporal task.
 
@@ -92,8 +93,11 @@ features_after_chapter_5 = list(set().union(basic_features, pca_features, time_f
 selected_features = ['temp_pattern_labelOnTable','labelOnTable', 'temp_pattern_labelOnTable(b)labelOnTable', 'cluster',
                      'pca_1_temp_mean_ws_120','pca_2_temp_mean_ws_120','pca_2','acc_watch_y_temp_mean_ws_120','gyr_watch_y_pse',
                      'gyr_watch_x_pse']
-possible_feature_sets = [basic_features, features_after_chapter_3, features_after_chapter_4, features_after_chapter_5, selected_features]
-feature_names = ['initial set', 'Chapter 3', 'Chapter 4', 'Chapter 5', 'Selected features']
+
+#possible_feature_sets = [basic_features, features_after_chapter_3, features_after_chapter_4, features_after_chapter_5, selected_features]
+possible_feature_sets = [features_after_chapter_3, features_after_chapter_4, features_after_chapter_5, selected_features]
+#feature_names = ['initial set', 'Chapter 3', 'Chapter 4', 'Chapter 5', 'Selected features']
+feature_names = [ 'Chapter 3', 'Chapter 4', 'Chapter 5', 'Selected features']
 
 # Let us first study whether the time series is stationary and what the autocorrelations are.
 
@@ -110,7 +114,7 @@ eval = RegressionEvaluation()
 
 # We repeat the experiment a number of times to get a bit more robust data as the initialization of e.g. the NN is random.
 
-repeats = 5
+repeats = 1
 
 # we set a washout time to give the NN's the time to stabilize. We do not compute the error during the washout time.
 
@@ -123,6 +127,8 @@ for i in range(0, len(possible_feature_sets)):
     print(f'Evaluating for features {possible_feature_sets[i]}')
     selected_train_X = train_X[possible_feature_sets[i]]
     selected_test_X = test_X[possible_feature_sets[i]]
+    selected_test_X.fillna(0, inplace=True)
+    selected_train_X.fillna(0, inplace=True)
 
     # First we run our non deterministic classifiers a number of times to average their score.
 
